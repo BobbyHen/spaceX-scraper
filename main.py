@@ -1,47 +1,64 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 import time
-from webbot import Browser
-# from bs4 import BeautifulSoup
-import requests
-from requests_html import HTMLSession
 
-url = 'https://iss-sim.spacex.com/'
-session = HTMLSession()
-response = session.get(url)
+PATH = '/Users/bobbyhenderson/Desktop/chrome_driver/chromedriver'
+URL = 'https://iss-sim.spacex.com/'
+driver = webdriver.Chrome(PATH)
 
-# r = requests.get(website)
-# parsed_html = BeautifulSoup(website, "html.parser")
+def getX():
+    currentX = driver.find_element_by_css_selector("#yaw .error").text
+    value = float(currentX[:-1])
+    print(value)
+    return value
 
-def getXCoords():
-    targetX =  float(response.html.find('.error')[0].text)
-    return targetX
+def checkRateX():
+    currentXRate = driver.find_element_by_css_selector("#yaw .rate").text
+    value = float(currentXRate[:-3])
+    return value
 
 def main():
+    driver.get(URL)
+    time.sleep(8)
+    driver.find_element_by_id('begin-button').click()
+    time.sleep(8)
+    currentX = getX()
+    rateX = checkRateX()
 
-    web = Browser()
-    web.go_to(url)
-    
+    left_btn = driver.find_element_by_id('yaw-left-button')
+    right_btn = driver.find_element_by_id('yaw-right-button')
+
+    # while currentX > 0.0 or currentX < 0.0:
     while True:
-        time.sleep(8)
-        web.click('BEGIN')
-        
-        currentX = getXCoords()
-        
-        # Move to the left and right until (selector = #yw .error) == 0.0
-        while currentX > 0.0 or currentX < 0.0:
-            if currentX < 0.0:
-                web.press(web.Key.RIGHT)
-                time.sleep(1.5)
-                currentX = getXCoords()
-                print(currentX) # Print value of current X value
+        if currentX < 0.0:
+            # Key press LEFT
+            left_btn.click()
+            time.sleep(1)
+            # Call getX()
+            currentX = getX()
+            rateX = checkRateX()
+            if rateX <= -0.4:
+                # Equalize X
+                for i in range(3):
+                    right_btn.click()
 
-            if currentX > 0.0:
-                web.press(web.Key.LEFT)
-                time.sleep(1.5)
-                currentX = getXCoords()
-                print(currentX) # Print value of current X value
-    
-    # print(value)
+        elif currentX > 0.0:
+            # Key press RIGHT
+            right_btn.click()
+            time.sleep(1)
+            # Call getX()
+            currentX = getX()
+            rateX = checkRateX()
+            if rateX >= 0.4:
+                # Equalize X
+                for i in range(3):
+                    left_btn.click()
+        # elif rateX == 0.0 and currentX <= 2.0 or currentX > 0.0:
+        #     break
+
+    # Keep window open
+    while True:
+        pass
 
 if __name__ == "__main__":
     main()
-
