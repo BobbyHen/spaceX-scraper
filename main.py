@@ -1,8 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from chrome_driver import PATH
 import time
 
-PATH = '/Users/bobbyhenderson/Desktop/chrome_driver/chromedriver'
 URL = 'https://iss-sim.spacex.com/'
 driver = webdriver.Chrome(PATH)
 
@@ -19,7 +19,7 @@ def checkRateX():
 
 def main():
     driver.get(URL)
-    time.sleep(8)
+    time.sleep(9)
     driver.find_element_by_id('begin-button').click()
     time.sleep(8)
     currentX = getX()
@@ -31,7 +31,7 @@ def main():
     # while currentX > 0.0 or currentX < 0.0:
     while True:
         if currentX < 0.0:
-            # Key press LEFT
+            # Go to the LEFT
             left_btn.click()
             time.sleep(1)
             # Call getX()
@@ -43,7 +43,7 @@ def main():
                     right_btn.click()
 
         elif currentX > 0.0:
-            # Key press RIGHT
+            # Go to the RIGHT
             right_btn.click()
             time.sleep(1)
             # Call getX()
