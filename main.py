@@ -1,47 +1,75 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from chrome_driver import PATH
 import time
-from webbot import Browser
-# from bs4 import BeautifulSoup
-import requests
-from requests_html import HTMLSession
 
-url = 'https://iss-sim.spacex.com/'
-session = HTMLSession()
-response = session.get(url)
+URL = 'https://iss-sim.spacex.com/'
+driver = webdriver.Chrome(PATH)
 
-# r = requests.get(website)
-# parsed_html = BeautifulSoup(website, "html.parser")
+"""
+    ---------------------------------------
+    :: HORIZONTAL TRANSLATIONS FUNCTIONS ::
+    ---------------------------------------
+"""
+def getX():
+    currentX = driver.find_element_by_css_selector("#yaw .error").text
+    value = float(currentX[:-1])
+    print(value)
+    return value
 
-def getXCoords():
-    targetX =  float(response.html.find('.error')[0].text)
-    return targetX
+def checkRateX():
+    currentXRate = driver.find_element_by_css_selector("#yaw .rate").text
+    value = float(currentXRate[:-3])
+    return value
+
+def horizontalControl():
+    currentX = getX()
+    rateX = checkRateX()
+
+    left_btn = driver.find_element_by_id('yaw-left-button')
+    right_btn = driver.find_element_by_id('yaw-right-button')
+
+    if currentX < 0.0:
+        # Go to the LEFT
+        left_btn.click()
+        time.sleep(1)
+        # Call getX()
+        currentX = getX()
+        rateX = checkRateX()
+        if rateX <= -0.4:
+            # Equalize X
+            for i in range(3):
+                right_btn.click()
+
+    elif currentX > 0.0:
+        # Go to the RIGHT
+        right_btn.click()
+        time.sleep(1)
+        # Call getX()
+        currentX = getX()
+        rateX = checkRateX()
+        if rateX >= 0.4:
+            # Equalize X
+            for i in range(3):
+                left_btn.click()
+"""
+    ---------------------------------------------
+    :: FORWARD/BACKWARD TRANSLATIONS FUNCTIONS ::
+    ---------------------------------------------
+"""
 
 def main():
+    driver.get(URL)
+    time.sleep(9)
+    driver.find_element_by_id('begin-button').click()
+    time.sleep(8)
 
-    web = Browser()
-    web.go_to(url)
-    
     while True:
-        time.sleep(8)
-        web.click('BEGIN')
+        horizontalControl()
         
-        currentX = getXCoords()
+        # Keep window open
+        pass
         
-        # Move to the left and right until (selector = #yw .error) == 0.0
-        while currentX > 0.0 or currentX < 0.0:
-            if currentX < 0.0:
-                web.press(web.Key.RIGHT)
-                time.sleep(1.5)
-                currentX = getXCoords()
-                print(currentX) # Print value of current X value
-
-            if currentX > 0.0:
-                web.press(web.Key.LEFT)
-                time.sleep(1.5)
-                currentX = getXCoords()
-                print(currentX) # Print value of current X value
-    
-    # print(value)
 
 if __name__ == "__main__":
     main()
-
