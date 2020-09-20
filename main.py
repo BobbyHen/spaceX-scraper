@@ -1,10 +1,14 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from chrome_driver import PATH
+# from geckodriver import PATH
 import time
 
+from selenium import webdriver
+
+from chrome_driver import PATH2
+
 URL = 'https://iss-sim.spacex.com/'
-driver = webdriver.Chrome(PATH)
+driver = webdriver.Chrome(PATH2)
+#browser = webdriver.Firefox(PATH)
+
 
 """
     ---------------------------------------
